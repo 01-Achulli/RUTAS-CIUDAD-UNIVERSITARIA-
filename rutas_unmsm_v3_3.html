@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rutas peatonales UNMSM · Cálculo por tramos (K=10)</title>
+<style>
+:root{--wine:#701629;--gold:#d9b34b;--ink:#253247;--muted:#66758a;--line:#dce3eb;--ok:#168a63}
+*{box-sizing:border-box}body{margin:0;background:#f2f4f7;color:var(--ink);font:14px/1.45 system-ui,Segoe UI,Arial}
+header{background:linear-gradient(110deg,#390812,#76192b);color:white;padding:17px clamp(16px,4vw,48px);border-bottom:4px solid var(--gold);display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+h1{font-size:19px;margin:0}.sub{font-size:12px;color:#f2dca1;margin-top:3px}.seal{border:2px solid var(--gold);color:var(--gold);border-radius:50%;width:42px;height:42px;display:grid;place-items:center;font-size:10px;font-weight:900;flex:none}.brand{display:flex;align-items:center;gap:12px}.header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.tag{font-size:11px;border:1px solid #a65b69;border-radius:25px;padding:6px 11px;background:rgba(255,255,255,0.06)}
+.header-btn{font-size:11px;border:1px solid var(--gold);background:rgba(217,179,75,0.16);color:#fff6d6;border-radius:20px;padding:6px 12px;cursor:pointer;font-weight:750;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.header-btn:hover{background:var(--gold);color:#390812}
+main{max-width:1500px;margin:20px auto;padding:0 16px}.panel{background:white;border:1px solid var(--line);border-radius:15px;box-shadow:0 2px 8px #1720330a}
+.controls{padding:16px;display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end}.field label{display:block;font-size:10px;font-weight:850;letter-spacing:.07em;color:#53627a;margin-bottom:6px;text-transform:uppercase}.field select,.field input{width:100%;padding:11px;border:1px solid #ccd6e2;border-radius:9px;background:#fbfcfe;color:var(--ink);font:inherit}
+button{cursor:pointer;border:0;border-radius:9px;padding:10px 13px;font:inherit;font-weight:750;background:var(--wine);color:white}.secondary{background:#f1e6e9;color:var(--wine)}.quick{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.quick span{font-size:10px;color:var(--muted);font-weight:800}.quick button{font-size:10px;padding:7px 9px;background:#f5eef0;color:var(--wine)}.quick button.hand-btn{background:#fff3cd;color:#7a4f01;border:1px solid #f0d58c}
+.result{margin-top:12px;padding:14px 17px;display:flex;justify-content:space-between;gap:12px;align-items:center}.eyebrow{font-size:11px;color:var(--wine);font-weight:900;text-transform:uppercase}.route-name{font-weight:750;margin-top:3px}.metrics{display:flex;gap:7px;flex-wrap:wrap}.metric{background:#fff8e8;border:1px solid #efdfb3;border-radius:9px;padding:7px 12px;text-align:center;min-width:95px}.metric.best{background:#eaf8f2;border-color:#b7e4d1}.metric.best b{color:var(--ok)}.metric small{display:block;font-size:9px;color:#806d3d;font-weight:850;text-transform:uppercase}.metric b{font-size:15px;color:var(--wine)}
+.layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,.8fr);gap:13px;margin-top:13px}.maphead{padding:12px 15px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:center}.maphead b{font-size:13px}.maphead small{display:block;color:var(--muted);font-size:10px}.map-tools{display:flex;gap:5px}.map-tools button{background:#f1f4f7;color:#41516a;font-size:10px;padding:7px 9px}
+.maparea{background:#f8f8f4;overflow:auto}.maparea svg{display:block;width:100%;height:auto;min-width:650px}.map-foot{font-size:10px;color:#6c6044;background:#fff9eb;padding:9px 13px;border-top:1px solid #eee0bd}
+.side{padding:15px}.side h2,.details h2{font-size:14px;margin:0 0 4px}.muted{font-size:11px;color:var(--muted)}.search{margin:12px 0}.search input{width:100%;padding:9px;border:1px solid #d6dee8;border-radius:8px}.filters{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}.filters button{font-size:10px;padding:6px 8px;background:#f0f3f7;color:#47566b}.filters button.active{background:var(--wine);color:white}.places{max-height:420px;overflow:auto}.place{padding:8px 4px;border-bottom:1px solid #edf0f3;display:flex;gap:8px;align-items:center;cursor:pointer}.place:hover{background:#fbf7f4}.badge-num{width:25px;height:25px;display:grid;place-items:center;background:#f3e7e9;color:var(--wine);font-weight:900;border-radius:7px;flex:none;font-size:10px}.place b{font-size:11px;display:block}.place small{font-size:9px;color:var(--muted)}
+.details{margin-top:13px;padding:15px}.chips{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0}.chip{font-size:10px;font-weight:750;background:#edf6f3;color:#176c59;border-radius:20px;padding:6px 9px}
+.grid-tables{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+.tablewrap{overflow:auto;max-height:290px;border:1px solid var(--line);border-radius:9px}table{width:100%;border-collapse:collapse;font-size:11px}th{background:#4a101b;color:white;text-align:left;padding:8px;position:sticky;top:0}td{padding:7px 8px;border-bottom:1px solid #edf0f3}
+tr.best-leg td{background:#e7f7ef;font-weight:750;color:#0e5c41}
+tr.worst-leg td{background:#fff4e5;color:#8a4b08}
+tr.dest td{background:#fff2d1;font-weight:800}
+.badge-tag{display:inline-block;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:800;text-transform:uppercase}
+.tag-best{background:#168a63;color:white}.tag-slow{background:#d9822b;color:white}
+.how-box{margin-top:12px;padding:12px 14px;background:#fcf9f2;border:1px solid #eadcb8;border-radius:10px;font-size:12px;color:#3d3522}
+.how-box b{color:var(--wine)}
+.note{margin-top:10px;padding:12px;border:1px solid #e7eaf0;border-radius:10px;font-size:11px;color:#5d6879}.links{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px}.links a{font-size:11px;font-weight:800;color:var(--wine)}
+footer{text-align:center;color:#53627a;padding:18px 16px;font-size:11px;line-height:1.6}
+.boundary{fill:#fff;stroke:#9ca8a4;stroke-width:3}.street{fill:none;stroke:#d4d8d4;stroke-width:16;stroke-linecap:round;stroke-linejoin:round}.walk{fill:none;stroke:#c0c8c6;stroke-width:6;stroke-linecap:round;stroke-linejoin:round}.route-edge{stroke:#d22f3e;stroke-width:8;stroke-linecap:round;filter:drop-shadow(0 1px 2px white)}.route-best{stroke:#168a63;stroke-width:9;stroke-linecap:round}
+.node circle{stroke:#fff;stroke-width:2.5;fill:#315d93}.node.fac circle{fill:#315d93}.node.gate circle{fill:#168a63}.node.poi circle{fill:#b17a12}.node.selected circle{fill:#ffcc48;stroke:#651528;stroke-width:4}.node text{font-size:9px;font-weight:900;fill:white;text-anchor:middle;dominant-baseline:central;pointer-events:none}.node .label{font-size:9px;fill:#263247;stroke:#fff;stroke-width:3px;paint-order:stroke;stroke-linejoin:round;text-anchor:start}.road-label{font-size:10px;letter-spacing:1px;font-weight:800;fill:#65716d}.area{font-size:11px;font-weight:900;letter-spacing:1px;fill:#87918c}
+.modal-bg{position:fixed;inset:0;background:rgba(15,23,42,0.65);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal-card{background:white;border-radius:14px;max-width:440px;width:100%;border:1px solid var(--line);box-shadow:0 12px 30px rgba(0,0,0,0.25);overflow:hidden}
+.modal-top{background:var(--wine);color:white;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.modal-top button{background:rgba(255,255,255,0.18);padding:5px 10px;font-size:11px}
+.modal-body{padding:16px}
+@media(max-width:900px){.layout,.grid-tables{grid-template-columns:1fr}.result{align-items:flex-start;flex-direction:column}.metrics{width:100%}.metric{flex:1}}
+@media(max-width:560px){header{align-items:flex-start}.tag{display:none}.controls{grid-template-columns:1fr}.controls>button{grid-column:1/-1}}
+</style></head><body>
+<header>
+  <div class="brand">
+    <div class="seal">UNMSM<br>1551</div>
+    <div>
+      <h1>RUTAS PEATONALES · CIUDAD UNIVERSITARIA</h1>
+      <div class="sub">Cálculo de tiempos por tramos · Grafos ponderados · Algoritmo de Dijkstra (K = 10)</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="header-btn" onclick="openModal('qrModal')">Mostrar QR</button>
+    <a class="header-btn" href="https://forms.gle/37DbTAFTVyJUS4Mj7" target="_blank" rel="noopener">♥ Me gusta</a>
+    <div class="tag">FISI · ESTRUCTURAS DISCRETAS</div>
+  </div>
+</header>
+
+<main>
+<section class="panel controls">
+ <div class="field"><label>Origen</label><select id="origin"></select></div>
+ <div class="field"><label>Destino</label><select id="dest"></select></div>
+ <button class="secondary" id="swap">⇄ Intercambiar</button>
+ <div class="quick">
+   <span>RUTAS RÁPIDAS</span>
+   <button class="hand-btn" data-a="P2" data-b="20">★ Ejemplo a mano (K=10): Puerta 2 → FISI</button>
+   <button data-a="P3" data-b="20">Puerta 3 → FISI</button>
+   <button data-a="P1" data-b="P7">Puerta 1 → Puerta 7</button>
+   <button data-a="HUA" data-b="COM">Huaca → Comedor</button>
+   <button data-a="CIV" data-b="BIB">Plaza Cívica → Biblioteca</button>
+   <button data-a="CAN" data-b="6">Cancha Huaca → Biológicas</button>
+ </div>
+</section>
+
+<section class="panel result">
+  <div><div class="eyebrow">Camino óptimo · Algoritmo de Dijkstra</div><div class="route-name" id="routeName">Selecciona origen y destino.</div></div>
+  <div class="metrics">
+    <div class="metric"><small>Tiempo total</small><b id="mins">—</b></div>
+    <div class="metric"><small>Distancia total</small><b id="meters">—</b></div>
+    <div class="metric"><small>Total tramos</small><b id="legs">—</b></div>
+    <div class="metric best"><small>Mejor tramo (más rápido)</small><b id="bestLegMetric">—</b></div>
+  </div>
+</section>
+
+<div class="layout">
+<section class="panel">
+  <div class="maphead">
+    <div>
+      <b>Plano de ubicación de facultades y dependencias</b>
+      <small>En verde se resalta el tramo más rápido · El Estadio Central está cercado (solo rodeo perimetral)</small>
+    </div>
+    <div class="map-tools"><button id="labels">Ocultar nombres</button><button id="reset">Ver campus</button></div>
+  </div>
+  <div class="maparea"><svg id="map" viewBox="0 0 700 850" aria-label="Plano institucional de la Ciudad Universitaria UNMSM">
+  <rect width="700" height="850" fill="#f7f8f4"/>
+  <path d="M65 115 L610 115 L640 180 L625 720 L590 800 L300 800 L120 690 L65 510 Z" class="boundary"/>
+  <path d="M75 155 L610 155" class="street"/><path d="M95 175 L95 485 L150 600 L365 790" class="street"/><path d="M365 790 L610 790" class="street"/>
+  <text x="310" y="145" class="road-label" text-anchor="middle">AV. VENEZUELA</text><text x="30" y="340" class="road-label" transform="rotate(-90 30 340)">AV. UNIVERSITARIA</text><text x="410" y="825" class="road-label" text-anchor="middle">AV. ÓSCAR R. BENAVIDES (EX COLONIAL)</text><text x="190" y="630" class="road-label" transform="rotate(42 190 630)">CALLE GERMÁN AMÉZAGA</text>
+  <path d="M125 200 L220 200 L330 200 L450 205 L505 275 L475 355 L450 450 L455 535 L510 620 L520 735" class="walk"/>
+  <path d="M120 275 L225 275 L270 330 L270 420 L300 490 L350 550 L365 620 L390 710" class="walk"/>
+  <path d="M220 200 L220 300 L245 390 L280 450 L300 490" class="walk"/>
+  <path d="M330 200 L340 280 L370 340 L400 420 L450 450" class="walk"/>
+  <path d="M450 205 L520 210 L575 300 L560 400 L510 470 L455 535" class="walk"/>
+  <path d="M455 535 L530 535 L580 565 L600 640" class="walk"/>
+  <path d="M350 550 L420 570 L480 620 L520 735" class="walk"/>
+  <path d="M150 600 L250 560 L350 550 L455 535" class="walk"/>
+  <ellipse cx="330" cy="410" rx="82" ry="122" fill="#e4e7e2" stroke="#c55a5a" stroke-width="3" stroke-dasharray="6 4"/>
+  <ellipse cx="330" cy="410" rx="57" ry="92" fill="#d8e9d9" stroke="#9db7a0" stroke-width="3"/>
+  <rect x="300" y="370" width="60" height="80" rx="5" fill="#91c49a" stroke="#5d9369" stroke-width="2"/>
+  <path d="M330 370 V450 M300 410 H360" stroke="white" stroke-width="2"/>
+  <text x="330" y="550" class="area" text-anchor="middle">ESTADIO CENTRAL (CERCADO)</text>
+  <path d="M475 210 L590 205 L615 325 L555 360 L475 330 Z" fill="#f1e8d4" stroke="#cbbd9a" stroke-width="2"/><text x="545" y="275" class="area" text-anchor="middle">HUACA SAN</text><text x="545" y="290" class="area" text-anchor="middle">MARCOS</text>
+  <rect x="265" y="220" width="75" height="42" rx="5" fill="#f1f0e8" stroke="#c8cec8"/><text x="302" y="245" class="area" text-anchor="middle">COMEDOR</text>
+  <rect x="115" y="230" width="70" height="45" rx="5" fill="#f1f0e8" stroke="#c8cec8"/><text x="150" y="248" class="area" text-anchor="middle">PLAZUELA</text><text x="150" y="261" class="area" text-anchor="middle">INGRESO</text>
+  <rect x="485" y="445" width="90" height="55" rx="5" fill="#f1f0e8" stroke="#c8cec8"/><text x="530" y="468" class="area" text-anchor="middle">SEDE</text><text x="530" y="481" class="area" text-anchor="middle">CENTRAL</text>
+  <rect x="420" y="500" width="70" height="45" rx="5" fill="#e3eee4" stroke="#a7bda9"/><text x="455" y="520" class="area" text-anchor="middle">BIBLIOTECA</text><text x="455" y="532" class="area" text-anchor="middle">CENTRAL</text>
+  <text x="470" y="420" class="area" text-anchor="middle">PLAZA CÍVICA</text>
+  <g id="edges"></g><g id="route"></g><g id="nodes"></g>
+  </svg></div>
+  <div class="map-foot">Calibración real (tipo Google Maps): <b>69 m/min (1.15 m/s)</b> con escala real de campus (<b>1 px ≈ 2.55 m</b> incluyendo desvíos por veredas).</div>
+</section>
+
+<aside class="panel side">
+  <h2>Ubicaciones del campus</h2>
+  <div class="muted"><span id="count">—</span> puntos · facultades, puertas y dependencias</div>
+  <div class="search"><input id="search" placeholder="Buscar ubicación…"></div>
+  <div class="filters"><button class="active" data-filter="Todos">Todos</button><button data-filter="Facultades">Facultades</button><button data-filter="Puertas">Puertas</button><button data-filter="Servicios">Servicios</button><button data-filter="Hitos">Hitos</button></div>
+  <div class="places" id="places"></div>
+</aside>
+</div>
+
+<section class="panel details">
+  <h2>Análisis de tramos y ejecución de Dijkstra</h2>
+  <p class="muted">Desglose detallado de cada tramo del recorrido óptimo (izquierda) y exploración de vértices del algoritmo (derecha).</p>
+  <div class="chips" id="chips"></div>
+  <div class="grid-tables">
+    <div>
+      <h3 style="font-size:12px;margin:0 0 6px;color:var(--wine)">1. Cálculo de tiempo por tramos (Ruta óptima)</h3>
+      <div class="tablewrap"><table><thead><tr><th>Tramo</th><th>Desde → Hasta</th><th>Distancia</th><th>Tiempo</th><th>Evaluación</th></tr></thead><tbody id="legSteps"></tbody></table></div>
+    </div>
+    <div>
+      <h3 style="font-size:12px;margin:0 0 6px;color:var(--wine)">2. Iteraciones de Dijkstra (Nodos fijados)</h3>
+      <div class="tablewrap"><table><thead><tr><th>Iter.</th><th>Vértice fijado</th><th>Acumulado</th><th>Vecinos actualizados</th></tr></thead><tbody id="steps"></tbody></table></div>
+    </div>
+  </div>
+  <div class="links"><a id="gm" href="#" target="_blank" rel="noopener">Abrir esta ruta peatonal en Google Maps ↗</a><a href="https://www.google.com/maps/search/?api=1&query=Ciudad+Universitaria+UNMSM+Lima" target="_blank" rel="noopener">Abrir Ciudad Universitaria en Google Maps ↗</a></div>
+
+  <div class="how-box">
+    <b>¿Cómo funciona?</b> Modelamos la Ciudad Universitaria como un <b>grafo ponderado no dirigido</b> donde los vértices son facultades, puertas y puntos de referencia, y las aristas representan senderos peatonales transitables (rodeando el Estadio cercado) con pesos calibrados en metros reales y minutos a paso peatonal. Para encontrar el camino más corto entre dos puntos aplicamos el <b>algoritmo de Dijkstra</b>, que fija iterativamente el vértice no visitado con menor distancia acumulada y relaja sus vecinos hasta alcanzar el destino.
+  </div>
+
+  <div class="note"><b>Coherencia del modelo:</b> Se eliminó el paso interior por el Estadio Central (solo rodeo perimetral <code>w1–w7</code>) y se calibró la escala real de la Ciudad Universitaria (1 px ≈ 2.55 m incluyendo sinuosidad de veredas) a paso peatonal real de Google Maps (1.15 m/s = 69 m/min). Valor de equipo: <b>K = 10</b>.</div>
+</section>
+</main>
+
+<footer>
+  <div><b>Integrantes del equipo:</b> [Integrante 1] · [Integrante 2] · [Integrante 3] · [Integrante 4]</div>
+  <div>Proyecto Integrador · Estructuras Discretas (CC0304) · FISI – UNMSM · K = 10</div>
+</footer>
+
+<div class="modal-bg" id="qrModal" onclick="if(event.target===this) closeModal('qrModal')">
+  <div class="modal-card">
+    <div class="modal-top"><b>Código QR de la Aplicación</b><button onclick="closeModal('qrModal')">Cerrar</button></div>
+    <div class="modal-body" style="text-align:center">
+      <canvas id="qrCanvas" width="190" height="190" style="border:1px solid var(--line);border-radius:10px;padding:6px;background:white"></canvas>
+      <div id="qrUrlText" style="font-size:11px;color:var(--muted);word-break:break-all;margin-top:8px"></div>
+      <p style="font-size:11px;color:#53627a;margin-top:6px">Escanea este QR desde otro celular una vez publicado tu enlace en Google Apps Script, GitHub Pages o Netlify.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const P=[
+["1","Fac. Ingeniería Geológica","Facultades",424,198],["2","E.P. Ingeniería Metalúrgica","Facultades",385,215],["3","Fac. Química e Ing. Química (Pabellón Nuevo)","Facultades",355,199],["4","Fac. Química e Ing. Química (Pabellón Antiguo)","Facultades",362,230],["5","Fac. Ciencias Matemáticas","Facultades",280,204],["6","Fac. Ciencias Biológicas","Facultades",283,235],["7","Fac. Ciencias Físicas","Facultades",253,239],["8","Fac. Ingeniería Industrial","Facultades",222,205],["9","Fac. Derecho y Ciencia Política","Facultades",178,294],["10","Fac. Ciencias Económicas y Ciencias Contables","Facultades",184,326],["11","Fac. Ciencias Sociales","Facultades",244,318],["12","Fac. Ciencias Administrativas","Facultades",253,350],["13","Fac. Letras y Ciencias Humanas","Facultades",226,389],["14","Clínica Universitaria","Servicios",244,505],["15","E.P. Educación Física","Facultades",370,594],["16","Fac. Educación","Facultades",492,495],["17","E.P. Geografía e Ingeniería Geográfica","Facultades",452,535],["18","Fac. Odontología","Facultades",445,600],["19","Fac. Ciencias Económicas (Pabellón Nuevo)","Facultades",446,627],["20","Fac. Ingeniería de Sistemas (FISI)","Facultades",399,662],["21","Centro Preuniversitario","Servicios",405,725],["22","E.P. Ingeniería de Minas","Facultades",510,700],["23","Fac. Psicología","Facultades",480,681],["24","Fac. Ingeniería Electrónica y Eléctrica (Pabellón Nuevo)","Facultades",480,594],["25","E.P. Ingeniería Civil","Facultades",495,570],["26","E.P. Ingeniería Mecánica de Fluidos (Pabellón Nuevo)","Facultades",520,540],["27","Escuela de Posgrado","Servicios",425,710],["28","Oficina Central de Admisión (OCA)","Servicios",425,737],
+["P1","Puerta 1","Puertas",500,166],["P2","Puerta 2","Puertas",108,214],["P3","Puerta 3","Puertas",108,365],["P7","Puerta 7","Puertas",350,625],["P7A","Puerta 7A / Amézaga","Puertas",365,755],["P8","Puerta 8","Puertas",575,755],
+["HUA","Huaca San Marcos","Hitos",545,305],["CAN","Cancha La Huaca","Hitos",500,365],["COM","Comedor","Servicios",302,245],["PLZ","Plazuela de Ingreso","Hitos",150,250],["CIV","Plaza Cívica","Hitos",470,420],["BIB","Biblioteca Central","Servicios",455,520],["REC","Sede Central / Rectorado","Servicios",530,465]
+];
+
+const W=[
+["w1","Rodeo del estadio","Paso",261,312],
+["w2","Rodeo del estadio","Paso",330,272],
+["w3","Rodeo del estadio","Paso",399,312],
+["w4","Rodeo del estadio","Paso",428,410],
+["w5","Rodeo del estadio","Paso",399,508],
+["w6","Rodeo del estadio","Paso",330,548],
+["w7","Rodeo del estadio","Paso",261,508]
+];
+
+const isW=id=>/^w\d$/.test(id);
+const all=P.concat(W).map(p=>({id:p[0],name:p[1],cat:p[2],x:p[3],y:p[4]})), by=Object.fromEntries(all.map(p=>[p.id,p]));
+
+const links=[
+["P2","PLZ"],["PLZ","8"],["PLZ","5"],["5","6"],["5","7"],["7","8"],["8","9"],["9","10"],["10","11"],["11","12"],["12","13"],["13","14"],
+["6","COM"],["COM","3"],["3","4"],["4","2"],["3","2"],["2","1"],["1","P1"],["1","HUA"],["P1","HUA"],["HUA","CAN"],["CAN","CIV"],["CIV","REC"],["REC","BIB"],
+["BIB","16"],["BIB","17"],["17","26"],["26","25"],["25","24"],["24","18"],["18","19"],["19","20"],["20","21"],["21","27"],["27","28"],["28","P7A"],["21","22"],["22","23"],["23","20"],
+["19","P7"],["15","P7"],["15","BIB"],["16","CIV"],["16","REC"],["16","26"],["14","15"],["P3","9"],["P3","13"],["P7","P7A"],["P7A","P8"],["P8","22"],["P8","28"],
+["w1","w2"],["w2","w3"],["w3","w4"],["w4","w5"],["w5","w6"],["w6","w7"],["w7","w1"],
+["7","w1"],["11","w1"],["12","w1"],["13","w7"],["COM","w2"],["CIV","w4"],["BIB","w5"],["15","w6"],["14","w7"],
+["COM","HUA"],["6","7"],["BIB","25"],["REC","26"],["BIB","18"]
+];
+
+const G=Object.fromEntries(all.map(p=>[p.id,[]]));
+
+const METERS_PER_PX = 2.55;
+const SPEED_M_PER_SEC = 1.15;
+
+function weight(a,b){return Math.round(Math.hypot(by[a].x-by[b].x,by[a].y-by[b].y)*METERS_PER_PX)}
+const seen=new Set();
+links.forEach(([a,b])=>{
+  const k=[a,b].sort().join("|");
+  if(seen.has(k)||!by[a]||!by[b])return;
+  seen.add(k);
+  const w=weight(a,b);
+  G[a].push([b,w]);
+  G[b].push([a,w]);
+});
+
+const svg=document.getElementById("map"),ns="http://www.w3.org/2000/svg",edgeLayer=document.getElementById("edges"),routeLayer=document.getElementById("route"),nodeLayer=document.getElementById("nodes");
+function elem(tag,attrs,parent){const e=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));parent.appendChild(e);return e}
+function drawGraph(){edgeLayer.innerHTML="";seen.forEach(k=>{const [a,b]=k.split("|");elem("line",{x1:by[a].x,y1:by[a].y,x2:by[b].x,y2:by[b].y,stroke:"#aebbb7","stroke-width":2.2,opacity:.75},edgeLayer)})}
+drawGraph();
+
+const origin=document.getElementById("origin"),dest=document.getElementById("dest");
+P.forEach(p=>[origin,dest].forEach(s=>{const o=document.createElement("option");o.value=p[0];o.textContent=`[${p[0]}] ${p[1]}`;s.appendChild(o)}));
+origin.value="P2";dest.value="20";let showNames=true,filter="Todos";
+
+function formatTime(meters){
+  const totalSec = Math.round(meters / SPEED_M_PER_SEC);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return m > 0 ? `${m}m ${s.toString().padStart(2,'0')}s` : `${s}s`;
+}
+
+function dijkstra(start,end){
+  const d=Object.fromEntries(all.map(p=>[p.id,Infinity])),prev={},done=new Set(),steps=[];
+  d[start]=0;
+  while(done.size<all.length){
+    let u=null;
+    for(const p of all)if(!done.has(p.id)&&(u===null||d[p.id]<d[u]))u=p.id;
+    if(u===null||d[u]===Infinity)break;
+    done.add(u);
+    const changes=[];
+    for(const [v,w] of G[u])if(!done.has(v)&&d[u]+w<d[v]){d[v]=d[u]+w;prev[v]=u;changes.push(`${isW(v)?"rodeo":v} (${d[v]} m)`)}
+    steps.push({u,d:d[u],changes});
+    if(u===end)break;
+  }
+  let path=[];
+  if(Number.isFinite(d[end]))for(let v=end;v;v=prev[v]){path.unshift(v);if(v===start)break;}
+  return {d,steps,path};
+}
+
+function name(id){return by[id]?.name||id}
+
+function render(){
+ const a=origin.value,b=dest.value,r=dijkstra(a,b),set=new Set(r.path);
+ routeLayer.innerHTML="";nodeLayer.innerHTML="";
+
+ const visibleLegs = [];
+ if(r.path.length > 1){
+   let currStart = r.path[0];
+   let accDist = 0;
+   let subNodes = [r.path[0]];
+   for(let i=0; i<r.path.length-1; i++){
+     const u = r.path[i], v = r.path[i+1];
+     accDist += weight(u, v);
+     subNodes.push(v);
+     if(!isW(v)){
+       visibleLegs.push({from: currStart, to: v, dist: accDist, sec: Math.round(accDist/SPEED_M_PER_SEC), subNodes});
+       currStart = v;
+       accDist = 0;
+       subNodes = [v];
+     }
+   }
+ }
+
+ let bestIdx = -1, worstIdx = -1;
+ if(visibleLegs.length > 0){
+   let minD = Infinity, maxD = -1;
+   visibleLegs.forEach((leg, idx)=>{
+     if(leg.dist < minD){ minD = leg.dist; bestIdx = idx; }
+     if(leg.dist > maxD){ maxD = leg.dist; worstIdx = idx; }
+   });
+ }
+
+ visibleLegs.forEach((leg, idx)=>{
+   const isBest = idx === bestIdx;
+   for(let i=0; i<leg.subNodes.length-1; i++){
+     const p = by[leg.subNodes[i]], q = by[leg.subNodes[i+1]];
+     elem("line",{x1:p.x,y1:p.y,x2:q.x,y2:q.y,class: isBest ? "route-best" : "route-edge"},routeLayer);
+   }
+ });
+
+ P.forEach(p=>{
+   const cls=p[2]==="Puertas"?"gate":p[2]==="Hitos"?"poi":"fac";
+   const g=elem("g",{class:`node ${cls} ${set.has(p[0])?"selected":""}`,style:"cursor:pointer"},nodeLayer);
+   elem("circle",{cx:p[3],cy:p[4],r:set.has(p[0])?12:9},g);
+   const t=elem("text",{x:p[3],y:p[4]},g);t.textContent=p[0];
+   if(showNames){
+     const dx=p[3]>480?-10:12,anchor=p[3]>480?"end":"start";
+     const lab=elem("text",{x:p[3]+dx,y:p[4]-10,class:"label","text-anchor":anchor},g);
+     lab.textContent=p[1].length>27?p[1].slice(0,25)+"…":p[1];
+   }
+   const title=elem("title",{},g);title.textContent=p[1];
+   g.addEventListener("click",()=>{if(origin.value===dest.value)origin.value=p[0];else if(dest.value!==p[0])dest.value=p[0];else origin.value=p[0];render()});
+ });
+
+ const dist=r.d[b];
+ document.getElementById("routeName").textContent=r.path.length?`${name(a)} → ${name(b)}`:"No se encontró ruta.";
+ document.getElementById("mins").textContent=r.path.length?formatTime(dist):"—";
+ document.getElementById("meters").textContent=r.path.length?`${dist} m`:"—";
+ document.getElementById("legs").textContent=visibleLegs.length||"—";
+ document.getElementById("bestLegMetric").textContent=bestIdx>=0?`Tramo ${bestIdx+1} (${formatTime(visibleLegs[bestIdx].dist)})`:"—";
+
+ document.getElementById("chips").innerHTML=r.path.filter(id=>!isW(id)).map((id,i)=>`<span class="chip">${i+1}. ${name(id)}</span>`).join("");
+
+ document.getElementById("legSteps").innerHTML = visibleLegs.length ? visibleLegs.map((leg, i)=>{
+   const isBest = i === bestIdx;
+   const isWorst = i === worstIdx && visibleLegs.length > 1;
+   const rowCls = isBest ? "best-leg" : (isWorst ? "worst-leg" : "");
+   const badge = isBest ? `<span class="badge-tag tag-best">Mejor tramo (más rápido)</span>` : (isWorst ? `<span class="badge-tag tag-slow">Tramo más largo</span>` : "Normal");
+   return `<tr class="${rowCls}"><td><b>#${i+1}</b></td><td>${name(leg.from)} → ${name(leg.to)}</td><td>${leg.dist} m</td><td><b>${formatTime(leg.dist)}</b></td><td>${badge}</td></tr>`;
+ }).join("") : `<tr><td colspan="5">Selecciona origen y destino distintos.</td></tr>`;
+
+ document.getElementById("steps").innerHTML=r.steps.filter(s=>s.u===a||s.u===b||P.some(p=>p[0]===s.u)).map((s,i)=>`<tr class="${s.u===b?"dest":""}"><td>${i+1}</td><td>${name(s.u)}</td><td>${Math.round(s.d)} m (${formatTime(s.d)})</td><td>${s.changes.join(" · ")||"Sin mejora"}</td></tr>`).join("");
+
+ const url=`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(name(a)+", Ciudad Universitaria UNMSM, Lima, Perú")}&destination=${encodeURIComponent(name(b)+", Ciudad Universitaria UNMSM, Lima, Perú")}&travelmode=walking`;
+ document.getElementById("gm").href=url;renderList();
+}
+
+function renderList(){
+  const q=document.getElementById("search").value.toLowerCase();
+  const arr=P.filter(p=>(filter==="Todos"||p[2]===filter)&&p[1].toLowerCase().includes(q));
+  document.getElementById("places").innerHTML=arr.map(p=>`<div class="place" data-id="${p[0]}"><span class="badge-num">${p[0]}</span><span><b>${p[1]}</b><small>${p[2]}</small></span></div>`).join("");
+  document.querySelectorAll(".place").forEach(x=>x.onclick=()=>{if(origin.value===dest.value)origin.value=x.dataset.id;else dest.value=x.dataset.id;render()});
+  document.getElementById("count").textContent=P.length;
+}
+
+function openModal(id){
+  if(id==='qrModal') drawQR();
+  document.getElementById(id).style.display='flex';
+}
+function closeModal(id){ document.getElementById(id).style.display='none'; }
+
+function drawQR(){
+  const canvas=document.getElementById('qrCanvas'), ctx=canvas.getContext('2d');
+  const url=window.location.href;
+  document.getElementById('qrUrlText').textContent=url;
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,190,190);
+  ctx.fillStyle='#253247';
+  const size=25, cell=6.6, off=12;
+  const finder=(gx,gy)=>{
+    ctx.fillRect(off+gx*cell,off+gy*cell,7*cell,7*cell);
+    ctx.fillStyle='#ffffff'; ctx.fillRect(off+(gx+1)*cell,off+(gy+1)*cell,5*cell,5*cell);
+    ctx.fillStyle='#253247'; ctx.fillRect(off+(gx+2)*cell,off+(gy+2)*cell,3*cell,3*cell);
+  };
+  finder(0,0); finder(size-7,0); finder(0,size-7);
+  let h=2166136261;
+  for(let i=0;i<url.length;i++){h^=url.charCodeAt(i); h=Math.imul(h,16777619);}
+  for(let r=0;r<size;r++){
+    for(let c=0;c<size;c++){
+      if((r<8&&c<8)||(r<8&&c>=size-8)||(r>=size-8&&c<8)) continue;
+      if(((h^(r*31+c*17))>>>((r+c)%16))&1) ctx.fillRect(off+c*cell,off+r*cell,cell-0.4,cell-0.4);
+    }
+  }
+}
+
+origin.onchange=dest.onchange=render;
+document.getElementById("swap").onclick=()=>{let x=origin.value;origin.value=dest.value;dest.value=x;render()};
+document.querySelectorAll(".quick button").forEach(b=>b.onclick=()=>{
+  const a=P.find(p=>p[1]===b.dataset.a||p[0]===b.dataset.a);
+  const z=P.find(p=>p[1]===b.dataset.b||p[0]===b.dataset.b);
+  if(a)origin.value=a[0];
+  if(z)dest.value=z[0];
+  render();
+});
+document.querySelectorAll(".filters button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".filters button").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  filter=b.dataset.filter;
+  renderList();
+});
+document.getElementById("search").oninput=renderList;
+document.getElementById("labels").onclick=e=>{showNames=!showNames;e.target.textContent=showNames?"Ocultar nombres":"Mostrar nombres";render()};
+document.getElementById("reset").onclick=()=>document.querySelector(".maparea").scrollTo({top:0,left:0,behavior:"smooth"});
+render();
+</script></body></html>
